@@ -77,7 +77,8 @@ def main():
             for exercise in workout_plan["program"]:
                 st.subheader(f"Exercise: {exercise['exercise']}")
                 st.write(f"**Sets:** {exercise['sets']}")
-                st.write(f"**Rest Period:** {exercise['recommendedRestPeriodInSeconds']} seconds")
+                if('recommendedRestPeriodInSeconds' in exercise):
+                    st.write(f"**Rest Period:** {exercise['recommendedRestPeriodInSeconds']} seconds")
                 st.write(f"**Notes:** {exercise['notes']}")
                 if "recommendedReps" in exercise:
                     st.write(f"**Recommended Reps per Set:** {exercise['recommendedReps']}")
