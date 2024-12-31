@@ -1,28 +1,18 @@
 import streamlit as st
 from openai import OpenAI
 
-
-
 # Set OpenAI API key from Streamlit secrets
 OPENAI_API_KEY = st.secrets["openai_api_key"]
 
 
 # Function to get workout plan from ChatGPT
-def generate_workout_plan(goal, injuries, equipment, training_years, workout_duration):
+def generate_workout_plan(goal, concerns, equipment, training_years, workout_duration):
     prompt = f"""
-    Create a custom workout program in the following JSON format:
-    {{
-        "program": [
-            {{ "exercise": "Push-ups", "sets": 3, "recommendedReps": 15, "recommendedRestPeriodInSeconds": 60}},
-            {{ "exercise": "Squats", "sets": 4, "recommendedReps": 20, "recommendedRestPeriodInSeconds": 90 }},
-            {{ "exercise": "Plank", "sets": 2, "time": 60, "recommendedRestPeriodInSeconds": 30 }}
-        ]
-    }}
-    The user wants to {goal}, reported the following injuries/pains: {injuries}, has access to this equipment: {equipment},
-    has been training consistently for {training_years} years, and wants the workout duration to be {workout_duration} minutes.
-
-
-    Only return the JSON object with no additional content and no formatting.
+        Goal: {goal}
+        Injuries, pains, concerns: {concerns}
+        Available equipment: {equipment}
+        Training years: {training_years}
+        Desired Workout Duration in Minutes: {workout_duration}
     """
     
 
@@ -30,16 +20,29 @@ def generate_workout_plan(goal, injuries, equipment, training_years, workout_dur
         api_key=OPENAI_API_KEY
     )
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": "You are a fitness expert and program generator."},
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0.7
+    thread = client.beta.threads.create()
+
+    message = client.beta.threads.messages.create(
+        thread_id=thread.id,
+        role="user",
+        content=prompt
     )
-    workout_plan = response.choices[0].message.content
-    print(workout_plan)
+
+    run = client.beta.threads.runs.create_and_poll(
+        thread_id=thread.id,
+        assistant_id="asst_yJR9QbP5Jd2iJefc23unnViw",
+    )
+
+    if run.status == 'completed': 
+        messages = client.beta.threads.messages.list(
+            thread_id=thread.id
+        )
+        print(messages.data[0].content[0].text.value)
+    else:
+        print(run.status)
+
+    workout_plan = messages.data[0].content[0].text.value
+
     return workout_plan
 
 # Streamlit app
@@ -48,8 +51,8 @@ def main():
 
     # Step 1: Ask for user inputs
     st.header("Step 1: Tell us about yourself")
-    goal = st.selectbox("What is your primary fitness goal?", ["Build muscle", "Lose fat", "Gain strength"])
-    injuries = st.text_area("Do you have any previous injuries, aches, or pains?")
+    goal = st.selectbox("What is your primary fitness goal?", ["Build muscle", "Lose fat", "Gain strength", "Improve endurance"])
+    concerns = st.text_area("Do you have any previous injuries, pains, or concerns?")
     equipment = st.text_input("What equipment do you have access to? (e.g., dumbbells, barbell, treadmill)")
     training_years = st.number_input("How many years have you been training consistently?", min_value=0.0, step=.25)
     workout_duration = st.number_input("How long should the workout be? (in minutes)", min_value=10, step=5)
@@ -57,7 +60,7 @@ def main():
 
     if st.button("Generate Program"):
         with st.spinner("Generating your custom program..."):
-            workout_plan_json = generate_workout_plan(goal, injuries, equipment, training_years, workout_duration)
+            workout_plan_json = generate_workout_plan(goal, concerns, equipment, training_years, workout_duration)
             st.session_state['workout_plan'] = workout_plan_json
             st.success("Program generated!")
 
@@ -75,10 +78,11 @@ def main():
                 st.subheader(f"Exercise: {exercise['exercise']}")
                 st.write(f"**Sets:** {exercise['sets']}")
                 st.write(f"**Rest Period:** {exercise['recommendedRestPeriodInSeconds']} seconds")
+                st.write(f"**Notes:** {exercise['notes']}")
                 if "recommendedReps" in exercise:
                     st.write(f"**Recommended Reps per Set:** {exercise['recommendedReps']}")
-                if "time" in exercise:
-                    st.write(f"**Recommended Time per Set (seconds):** {exercise['time']}")
+                if "timeInSeconds" in exercise:
+                    st.write(f"**Recommended Time per Set (seconds):** {exercise['timeInSeconds']}")
 
                 # Inputs for tracking progress
                 for set_num in range(1, exercise['sets'] + 1):
