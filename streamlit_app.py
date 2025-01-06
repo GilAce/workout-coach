@@ -9,15 +9,52 @@ SENDGRID_API_KEY = st.secrets["sendgrid_api_key"]
 
 
 def send_email(receiver_email, workout_plan):
-    html_content = markdown.markdown(workout_plan, extensions=['extra', 'sane_lists'])
+ # Append a feedback request to the workout plan
 
+    intro = """
+Hi there!
+
+Here's you're workout!
+
+Best regards,
+
+Your amigos at Nexus Fitness :)
+    """
+
+    feedback_request = """
+
+### We'd love your feedback!
+
+Please let us know what you think about your custom workout plan. Simply reply to this email with your thoughts or suggestions!
+
+Your feedback helps us improve and provide the best possible experience. Thank you!
+
+To ensure you’re off to a strong start, here are a few questions to help us refine your workout experience:
+
+- Does this plan match your fitness goals and current lifestyle? If not, what changes would make it better?
+
+- Do you feel confident about performing the exercises? Would links to tutorials or tips help?
+
+- How did your first session go? Was it too easy, too hard, or just right?
+
+- Did you need to modify the workout? If so, what did you change, and why?
+
+- What’s one thing you’d love to see in your next plan?
+    """
+
+    # Add the feedback request to both the plain text and HTML versions
+    workout_plan_with_intro_and_feedback = intro + "\n"  + workout_plan + "\n" + feedback_request
+    html_content_with_intro_and_feedback = markdown.markdown(workout_plan_with_intro_and_feedback, extensions=['extra', 'sane_lists'])
+
+    # Create the email message
     message = Mail(
         from_email='nxsfit0221@gmail.com',
         to_emails=receiver_email,
         subject='Your Custom Workout Plan from Nexus FitNow',
-        plain_text_content=workout_plan,  # Send raw markdown as plain text
-        html_content=html_content  # Rendered HTML content
+        plain_text_content=workout_plan_with_intro_and_feedback,  # Plain text with feedback
+        html_content=html_content_with_intro_and_feedback  # Rendered HTML with feedback
     )
+
 
     try:
         sg = SendGridAPIClient(SENDGRID_API_KEY)
@@ -72,15 +109,15 @@ def generate_workout_plan(goal, concerns, equipment, training_years, workout_dur
 
 # Streamlit app
 def main():
-    st.title("Nexus FitNow")
+    st.title("Nexus FitNow (Beta)")
 
     # Step 1: Ask for user inputs
     st.header("First, tell us about yourself!")
-    goal = st.selectbox("What is your primary fitness goal?", ["Build muscle", "Lose fat", "Gain strength", "Improve endurance", "Improve power"])
-    concerns = st.text_input("Do you have any previous injuries, pains, weaknesses, tightness, or concerns?")
+    goal = st.selectbox("What is your primary fitness goal?", ["Build muscle", "Lose fat", "Gain strength", "Improve endurance", "Improve power", "Injury Prevention/Rehab"])
+    concerns = st.text_area("Do you have any previous injuries, pains, weaknesses, tightness, or concerns?")
     equipment = st.text_input("What equipment do you have access to? (e.g., full gym, dumbbells, barbell, bands, treadmill)")
     training_years = st.number_input("How many years have you been training consistently?", min_value=0.0, step=.25)
-    workout_duration = st.number_input("How long should the workout be? (in minutes)", min_value=10, step=5)
+    workout_duration = st.number_input("How long should the workout be? (in minutes)", min_value=10, step=5, value=30)
     workout_type = st.text_input("Do you have a type of workout that you'd like to do today?")
     focus_area = st.text_input("Is there a specific area that you'd like to focus on?")
 
