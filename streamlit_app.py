@@ -22,7 +22,6 @@ def insert_google_links(workout_plan):
     return updated_plan
 
 
-
 def send_email(receiver_email, workout_plan):
  # Append a feedback request to the workout plan
 
@@ -34,10 +33,17 @@ Here's you're workout!
 Best regards,
 
 Your amigos at Nexus Fitness :)
+
+P.S If you'd like a new program: [Go to Nexus FitNow!](https://workout-coach-oa7cwi8iywk.streamlit.app/)
+
+---
+
     """
 
     feedback_request = """
 
+---
+        
 ### We'd love your feedback!
 
 Please let us know what you think about your custom workout plan. Simply reply to this email with your thoughts or suggestions!
@@ -47,8 +53,6 @@ Your feedback helps us improve and provide the best possible experience. Thank y
 To ensure you’re off to a strong start, here are a few questions to help us refine your workout experience:
 
 - Does this plan match your fitness goals and current lifestyle? If not, what changes would make it better?
-
-- Do you feel confident about performing the exercises? Would links to tutorials or tips help?
 
 - How did your first session go? Was it too easy, too hard, or just right?
 
@@ -86,13 +90,13 @@ To ensure you’re off to a strong start, here are a few questions to help us re
 
 def generate_workout_plan(goal, concerns, equipment, training_years, workout_duration, workout_type, focus_area):
     prompt = f"""
-        Goal: {goal}
-        Injuries, pains, concerns: {concerns}
-        Available equipment: {equipment}
-        Training years: {training_years}
-        Required Workout Duration in Minutes: {workout_duration}
-        Workout Type: {workout_type}
-        Focus Area: {focus_area}
+        - Goal: {goal}
+        - Injuries/Pains: {concerns}
+        - Equipment: {equipment}
+        - Training Years: {training_years}
+        - Duration: {workout_duration} minutes
+        - Workout Type: {workout_type}
+        - Focus Area: {focus_area}
     """
 
     client = OpenAI(
@@ -109,7 +113,7 @@ def generate_workout_plan(goal, concerns, equipment, training_years, workout_dur
 
     run = client.beta.threads.runs.create_and_poll(
         thread_id=thread.id,
-        assistant_id="asst_EMeOkJZoPiRqwgQwqiu83zBR",
+        assistant_id="asst_0BwF5ADrrHYMXacxytCSgrkS",
     )
 
     if run.status == 'completed':
