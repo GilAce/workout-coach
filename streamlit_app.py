@@ -138,30 +138,32 @@ def main():
     st.header("First, tell us about yourself!")
 
     goal = st.selectbox(
-        label="What is your primary fitness goal?",
-        placeholder="Choose an option",
-        options=["Build muscle", "Lose fat", "Gain strength", "Improve endurance", "Improve power", "Injury Prevention/Rehab"])
-    concerns = st.text_area(
-        label="Do you have any areas of concern?",
-        placeholder="If any, specify any previous injuries, pains, weaknesses, tightness, etc.")
-    equipment = st.text_input(
-        label="What equipment do you have access to?",
-        placeholder="If any, specify things like full gym, dumbbells, barbell, bands, treadmill, etc.")
+        label="What is your main fitness goal for this workout?",
+        placeholder="Choose one from the list.",
+        options=["Build muscle", "Lose fat", "Gain strength", "Improve endurance", "Improve power", "Injury Prevention/Rehab"],
+        index=None)
     training_years = st.number_input(
-        label="How many years have you been training consistently?", 
+        label="How long have you been consistently working out? (in years)", 
         min_value=0.0, 
         step=.25)
     workout_duration = st.number_input(
-        label="How long should the workout be? (in minutes)", 
+        label="How much time do you have for your workout today? (in minutes)", 
         min_value=10, 
         step=5, 
         value=30)
-    workout_type = st.text_input(
-       label="Do you have a type of workout that you'd like to do today?",
-       placeholder="If any, specify things like full body, legs, specific muscles, intensity level, cardio, mobility, etc.")
-    focus_area = st.text_input(
-        label="Is there a specific area that you'd like to focus on?",
-        placeholder="If any, specify things like muscle(s), exercises, etc.")
+    
+    concerns = st.text_area(
+        label="Do you have any injuries, pain points, or mobility issues? (optional)",
+        placeholder="Examples: Lower back pain, knee pain, tight hamstrings, recovering from a shoulder injury, etc.")
+    equipment = st.text_area(
+        label="What equipment do you have access to for this workout? (optional)",
+        placeholder="Examples: Full Gym, Dumbbells, Resistance Bands, Barbell, Treadmill, or None. Note: Equipment will be used only if it aligns with your goals and preferences.")
+    workout_type = st.text_area(
+       label="What kind of workout are you in the mood for today? (optional)",
+       placeholder="Examples: Full body, cardio, legs, light intensity, upper body focus, etc.")
+    focus_area = st.text_area(
+        label="Which muscle group or movement would you like to emphasize? (optional)",
+        placeholder="Examples: Core, arms, glutes, balance exercises, etc.")
 
     if st.button("Generate Program"):
         with st.spinner("Generating your custom program..."):
