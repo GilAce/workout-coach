@@ -14,7 +14,8 @@ def insert_google_links(workout_plan):
     # Find markers <<<Exercise>>> and replace them with markdown links
     def replace_with_link(match):
         exercise_name = match.group(1)
-        search_url = f"https://www.google.com/search?q={urllib.parse.quote(exercise_name)}"
+        search_query = f"How to do {exercise_name}"
+        search_url = f"https://www.google.com/search?tbm=vid&q={urllib.parse.quote(search_query)}"
         return f"[{exercise_name}]({search_url})"
     
     # Use regex to find and replace markers <<<Exercise>>>
