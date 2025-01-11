@@ -140,7 +140,16 @@ def update_workout_plan_with_email(document_id, email):
         client.close()
 
 def generate_workout_plan(goal, training_years, workout_duration, 
-                          concerns="None", equipment="None", workout_type="None", focus_area="None"):
+                          concerns, equipment, workout_type, focus_area):
+    if not concerns:
+        concerns = "None"
+    if not equipment:
+        equipment = "None"
+    if not workout_type:
+        workout_type = "None"
+    if not focus_area:
+        focus_area = "None"
+
     prompt = f"""- Goal: {goal}
 - Injuries/Pains: {concerns}
 - Equipment: {equipment}
@@ -181,16 +190,6 @@ def generate_workout_plan(goal, training_years, workout_duration,
         prompt=prompt,
         workout_plan=workout_plan
     )
-    
-    print("Assistant ID:")
-    print(ASSISTANT_ID)
-    print("Thread ID:")
-    print(thread.id)
-    print("Prompt:")
-    print(prompt)
-    print("Workout Plan:")
-    print(workout_plan)
-
 
     return workout_plan, saved_document_id
 
@@ -199,7 +198,7 @@ def main():
     st.title("Nexus FitNow (Beta)")
 
     # Step 1: Ask for user inputs
-    st.header("First, tell us about yourself!")
+    st.header("Customize Your Workout Plan!")
 
     goal = st.selectbox(
         label="What is your main fitness goal for this workout?",
@@ -229,41 +228,40 @@ def main():
         label="Which muscle group or movement would you like to emphasize? (optional)",
         placeholder="Examples: Core, arms, glutes, balance exercises, etc.")
 
-    if st.button("Generate Program"):
-        with st.spinner("Generating your custom program..."):
+    if st.button("Create My Workout"):
+        with st.spinner("Mixing up the perfect workout recipe for you..."):
             workout_plan, saved_document_id = generate_workout_plan(
                 goal, training_years, workout_duration, concerns, equipment, workout_type, focus_area)
             workout_plan = insert_google_links(workout_plan)
             st.session_state['workout_plan'] = workout_plan
             st.session_state['saved_document_id'] = saved_document_id
-            st.success("Program generated!")
 
     # Step 2: Display workout plan and create dynamic pages
     if "workout_plan" in st.session_state and "saved_document_id" in st.session_state:
-        st.header("Here is your custom workout! Let's Go!")
+        st.header("Your Personalized Workout Is Ready!")
         try:
             workout_plan = st.session_state['workout_plan']
             saved_document_id = st.session_state['saved_document_id']
 
             st.markdown(workout_plan, unsafe_allow_html=True)
 
-            st.header("Don't lose your custom workout. Get it sent to your email!")
+            st.header("Save Your Workout for Easy Access!")
 
-            email = st.text_input(label="Enter your email address:", placeholder="Example: awesome_person@cool_domain.com")
-            if st.button("Send to Email"):
+            email = st.text_input(label="Email Your Workout to Yourself!", placeholder="Your email address (we'll send your plan here)")
+            if st.button("Email Me My Workout"):
                 if email:
                     success = send_email(email, workout_plan)
-                    update_workout_plan_with_email(saved_document_id, email)
                     if success:
-                        st.success("Workout plan sent successfully!")
+                        st.success("Your workout plan is on its way!")
+                        update_workout_plan_with_email(saved_document_id, email)
                     else:
-                        st.error(
-                            "Failed to send email. Please check your email address and try again.")
+                        st.error("Oops! We couldn't send your workout. Double-check your email and try again.")
                 else:
-                    st.warning("Please enter a valid email address.")
+                    st.warning("Hmm, that doesn’t look like a valid email. Try again!")
 
         except Exception as e:
-            st.error(f"Error parsing workout plan: {e}")
+            st.error("We hit a snag displaying your workout. Let’s fix it—try refreshing!")
+            print(f"Error parsing workout: {e}")
 
 
 if __name__ == "__main__":
