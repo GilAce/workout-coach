@@ -9,7 +9,6 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 from datetime import datetime
 
-
 OPENAI_API_KEY = st.secrets["openai_api_key"]
 SENDGRID_API_KEY = st.secrets["sendgrid_api_key"]
 ASSISTANT_ID = "asst_0BwF5ADrrHYMXacxytCSgrkS"
@@ -54,7 +53,7 @@ P.S If you'd like a new program: [Go to Nexus FitNow!](https://workout-coach-oa7
         
 ### We'd love your feedback!
 
-Please let us know what you think about your custom workout plan. Simply reply to this email with your thoughts or suggestions!
+Let us know what you think about your custom workout plan. Simply reply to this email with your thoughts or suggestions!
 
 Your feedback helps us improve and provide the best possible experience. Thank you!
 
